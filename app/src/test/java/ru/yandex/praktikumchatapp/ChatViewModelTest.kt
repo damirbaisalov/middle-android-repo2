@@ -1,3 +1,5 @@
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -32,8 +34,9 @@ class ChatViewModelTest {
     @Test
     fun `send message should update state with MyMessage`() = runTest {
         val message = Message.MyMessage("TestMessage")
-
-        // TODO Задание 5: допишите юнит-тест
+        viewModel.sendMyMessage(message.text)
+        val state = viewModel.chatState.value
+        assertTrue(state.messages.contains(message))
     }
 
     @Test
