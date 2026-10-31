@@ -25,11 +25,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -71,9 +75,15 @@ fun ChatScreen(
     modifier: Modifier = Modifier
 ) {
     val viewModel = remember { ChatViewModel() }
-    val messagesList = viewModel.messages.observeAsState(emptyList())
+    val state by viewModel.chatState.collectAsState()
     val messageText = remember { mutableStateOf("") }
-    // TODO Задание 3: добавьте focusRequester
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(state.shouldShowKeyboard) {
+        if (state.shouldShowKeyboard) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
 
@@ -83,7 +93,7 @@ fun ChatScreen(
                 .weight(1f)
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
-            items(messagesList.value) { message ->
+            items(state.messages) { message ->
                 when (message) {
                     is Message.MyMessage -> MyMessageCard(message)
                     is Message.OtherMessage -> OtherMessageCard(message)
@@ -95,7 +105,7 @@ fun ChatScreen(
         Row(
             modifier = Modifier
                 .padding(16.dp)
-                // TODO Задание 3: добавьте focusRequester
+                .focusRequester(focusRequester)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
